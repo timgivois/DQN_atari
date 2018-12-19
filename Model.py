@@ -21,11 +21,6 @@ class Model:
         self.min_epsilon = min_epsilon
         self.model = self._build_model()
 
-        if session is None:
-            self.session = tf.InteractiveSession()
-
-        self.session.run(tf.global_variables_initializer())
-
     def _build_model(self):
         # first layer
         self.xT = tf.placeholder(tf.uint8, shape=(None, 82, 75, 3), name="x")
@@ -70,6 +65,9 @@ class Model:
         ])
 
         return predictions
+
+    def set_session(self, session):
+        self.session = session
 
     def predict(self, values):
         return self.session.run(self.model, feed_dict={self.xT: np.array(values).reshape(1, 82, 75, 3)})[0]
