@@ -131,7 +131,7 @@ class Model:
 
                 # if finished, tell me it finished
                 if done:
-                    if total_reward > max_reward:
+                    if total_reward >= max_reward:
                         max_game = game
                         max_actions_made = len(self.actions_made)
                         max_reward = total_reward
