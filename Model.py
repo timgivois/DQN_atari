@@ -23,6 +23,8 @@ class Model:
 
         if session is None:
             self.session = tf.InteractiveSession()
+        else:
+            self.session = session
         self.session.run(tf.global_variables_initializer())
 
     def _build_model(self):
