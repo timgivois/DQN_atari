@@ -1,11 +1,13 @@
 import numpy as np
 import tensorflow as tf
 
+
 def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
+
 class Model:
-    def __init__(self, actions, gamma=.1, epsilon=1, batch_size=50, epsilon_decay=.999):
+    def __init__(self, actions, gamma=.1, epsilon=1, batch_size=50, epsilon_decay=.999, min_epsilon=.1, session=None):
 
         self.actions = [x for x in range(len(actions))]
         # exploit vs explore value
@@ -16,8 +18,12 @@ class Model:
         self.gamma = gamma
         self.batch_size = batch_size
         self.actions_made = []
+        self.min_epsilon = min_epsilon
         self.model = self._build_model()
-        self.session = tf.InteractiveSession()
+
+        if session is None:
+            self.session = tf.InteractiveSession()
+
         self.session.run(tf.global_variables_initializer())
 
     def _build_model(self):
@@ -111,14 +117,14 @@ class Model:
 
         return new_image
 
-    def run(self, games, times_in_epoch, env):
+    def run(self, games, env):
         max_reward = 0
         max_game = 0
         max_actions_made = 0
         for game in range(games):
             total_reward = 0
             state = self.preprocess_image(env.reset())
-            for j in range(times_in_epoch):
+            while True:
                 # get the next action
                 action = self.explore_or_exploit(state)
 
@@ -140,6 +146,6 @@ class Model:
 
             self.fit_nn()
             self.actions_made = []
-            self.epsilon = self.epsilon * self.epsilon_decay
+            self.epsilon = self.epsilon * self.epsilon_decay if self.epsilon * self.epsilon_decay > self.min_epsilon else self.min_epsilon
 
         print("\n\nBest game {}, actions_made: {}, score {}".format(max_game, max_actions_made, max_reward))
