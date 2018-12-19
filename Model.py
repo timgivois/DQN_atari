@@ -112,7 +112,9 @@ class Model:
         return new_image
 
     def run(self, games, times_in_epoch, env):
-
+        max_reward = 0
+        max_game = 0
+        max_actions_made = 0
         for game in range(games):
             total_reward = 0
             state = self.preprocess_image(env.reset())
@@ -129,9 +131,15 @@ class Model:
 
                 # if finished, tell me it finished
                 if done:
-                    print('game: {}/{}, actions_made: {} score: {}'.format(game, games, len(self.actions_made), total_reward))
+                    if total_reward > max_reward:
+                        max_game = game
+                        max_actions_made = len(self.actions_made)
+                        max_reward = total_reward
+                    print('game: {}/{}, actions_made: {}, score: {}'.format(game, games, len(self.actions_made), total_reward))
                     break
 
             self.fit_nn()
             self.actions_made = []
             self.epsilon = self.epsilon * self.epsilon_decay
+
+        print("\n\nBest game {}, actions_made: {}, score {}".format(max_game, max_actions_made, max_reward))
