@@ -7,7 +7,7 @@ def rgb2gray(rgb):
 
 
 class Model:
-    def __init__(self, actions, gamma=.1, epsilon=1, epsilon_decay=.999, min_epsilon=.1, session=None):
+    def __init__(self, actions, gamma=.1, epsilon=1, epsilon_decay=.999, min_epsilon=.1, session=None, learning_rate=.01):
 
         self.actions = [x for x in range(len(actions))]
         # exploit vs explore value
@@ -18,7 +18,9 @@ class Model:
         self.gamma = gamma
         self.actions_made = []
         self.min_epsilon = min_epsilon
+        self.learning_rate = learning_rate
         self.model = self._build_model()
+
 
         if session is None:
             self.session = tf.InteractiveSession()
@@ -58,7 +60,7 @@ class Model:
         losses = tf.squared_difference(self.yT, action_predictions)
         self.loss = tf.reduce_mean(losses)
 
-        optimizer = tf.train.RMSPropOptimizer(0.00025, 0.99, 0.0, 1e-6)
+        optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
 
         self.train_op = optimizer.minimize(self.loss, global_step=tf.contrib.framework.get_global_step())
 
