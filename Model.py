@@ -113,8 +113,8 @@ class Model:
 
     def run(self, games, times_in_epoch, env):
 
-
         for game in range(games):
+            total_reward = 0
             state = self.preprocess_image(env.reset())
             for j in range(times_in_epoch):
                 # get the next action
@@ -122,13 +122,14 @@ class Model:
 
                 # act
                 next_state, reward, done, _ = env.step(action)
+                total_reward += reward
                 state = self.preprocess_image(next_state)
-                self.save_current_state(state, action, reward, self.preprocess_image(next_state),done)
+                self.save_current_state(state, action, total_reward, self.preprocess_image(next_state), done)
                 # get next_state
 
                 # if finished, tell me it finished
                 if done:
-                    print('game: {}/{}, actions_made: {} score: {}'.format(game, games, len(self.actions_made), reward))
+                    print('game: {}/{}, actions_made: {} score: {}'.format(game, games, len(self.actions_made), total_reward))
                     break
 
             self.fit_nn()
