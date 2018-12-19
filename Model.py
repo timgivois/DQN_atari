@@ -5,7 +5,7 @@ def rgb2gray(rgb):
     return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
 class Model:
-    def __init__(self, actions, gamma=.1, epsilon=1, batch_size=50, epsilon_decay=.999):
+    def __init__(self, actions, gamma=.1, epsilon=1, batch_size=50, epsilon_decay=.9999):
 
         self.actions = [x for x in range(len(actions))]
         # exploit vs explore value
