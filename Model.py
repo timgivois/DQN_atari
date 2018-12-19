@@ -102,16 +102,22 @@ class Model:
 
     def fit_nn(self):
         batch_size = int(len(self.actions_made)*.1) # 10% of actions made
-        indexes = np.random.randint(0, len(self.actions_made))
+        indexes = np.random.randint(0, len(self.actions_made), batch_size)
         actions_sampled = [self.actions_made[x] for x in indexes]
+        states = []
+        actionsT = []
+        targets = []
 
         for state, action, reward, next_state, done in actions_sampled:
             target = reward
             if not done:
-
                 target = reward + self.gamma * np.argmax(self.predict(next_state))
-            # gradient descent
-            self.update(state, action, target)
+            
+            states.append(state)
+            actionsT.append(action)
+            targets.append(targets
+            
+        self.update(states, actionsT, targets)
 
     def preprocess_image(self, image):
         # crop and downsample image
