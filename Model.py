@@ -7,7 +7,7 @@ def rgb2gray(rgb):
 
 
 class Model:
-    def __init__(self, actions, gamma=.1, epsilon=1, batch_size=50, epsilon_decay=.999, min_epsilon=.1, session=None):
+    def __init__(self, actions, gamma=.1, epsilon=1, epsilon_decay=.999, min_epsilon=.1, session=None):
 
         self.actions = [x for x in range(len(actions))]
         # exploit vs explore value
@@ -16,7 +16,6 @@ class Model:
 
         # deep learning neural network attributes
         self.gamma = gamma
-        self.batch_size = batch_size
         self.actions_made = []
         self.min_epsilon = min_epsilon
         self.model = self._build_model()
@@ -100,7 +99,8 @@ class Model:
         self.actions_made.append([state, action, reward, next_state, done])
 
     def fit_nn(self):
-        indexes = np.random.randint(0, len(self.actions_made), self.batch_size)
+        batch_size = int(len(self.actions_made)*.1) # 10% of actions made
+        indexes = np.random.randint(0, len(self.actions_made))
         actions_sampled = [self.actions_made[x] for x in indexes]
 
         for state, action, reward, next_state, done in actions_sampled:
