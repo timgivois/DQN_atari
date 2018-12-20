@@ -7,7 +7,7 @@ def rgb2gray(rgb):
 
 
 class Model:
-    def __init__(self, actions, gamma=.1, epsilon=1, epsilon_decay=.999, min_epsilon=.1, session=None, learning_rate=.01):
+    def __init__(self, actions, gamma=.1, epsilon=1, epsilon_decay=.9995, min_epsilon=.1, session=None, learning_rate=.1):
 
         self.actions = [x for x in range(len(actions))]
         # exploit vs explore value
@@ -54,22 +54,17 @@ class Model:
         predictions = tf.contrib.layers.fully_connected(fc1, len(self.actions))
 
         # optimizer for the nn
-        gather_indices = tf.range(batch_size) * tf.shape(predictions)[1] + self.actions
-        action_predictions = tf.gather(tf.reshape(predictions, [-1]), gather_indices)
-
-        losses = tf.squared_difference(self.yT, action_predictions)
-        self.loss = tf.reduce_mean(losses)
-
-        optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
+        gather_indices = tf.range(batch_size) * tf.shape(predictions)[1] + self.actionsT
+        self.action_predictions = tf.gather(tf.reshape(predictions, [-1]), gather_indices)
+        
+        self.losses = tf.squared_difference(self.yT, self.action_predictions)
+        self.loss = tf.reduce_mean(self.losses)
+        
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
         self.train_op = optimizer.minimize(self.loss, global_step=tf.contrib.framework.get_global_step())
 
-        self.summaries = tf.summary.merge([
-            tf.summary.scalar("loss", self.loss),
-            tf.summary.histogram("loss_hist", losses),
-            tf.summary.histogram("q_values_hist", predictions),
-            tf.summary.scalar("max_q_value", tf.reduce_max(predictions))
-        ])
+
 
         return predictions
 
@@ -80,7 +75,8 @@ class Model:
         return self.session.run(self.model, feed_dict={self.xT: np.array(values).reshape(1, 82, 75, 3)})[0]
 
     def update(self, s, a, y):
-        feed_dict = { self.xT: np.array(s).reshape(1,82,75,3), self.yT: y, self.actionsT: a }
+        states_reshaped = np.array(s).reshape(len(s), 82, 75, 3)
+        feed_dict = { self.xT: states_reshaped, self.yT: y, self.actionsT: a }
 
         loss, _ = self.session.run(
             [self.loss, self.train_op],
@@ -115,7 +111,7 @@ class Model:
             
             states.append(state)
             actionsT.append(action)
-            targets.append(targets
+            targets.append(target)
             
         self.update(states, actionsT, targets)
 
